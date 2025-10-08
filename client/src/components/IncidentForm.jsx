@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createIncident } from '../services/api';
+import { MdAddAlert } from 'react-icons/md';
 
 export default function IncidentForm({ onAdd }) {
   const [form, setForm] = useState({
@@ -51,8 +52,9 @@ export default function IncidentForm({ onAdd }) {
       </select>
       <button
         type="submit"
-        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-semibold transition-colors duration-200"
+        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-semibold flex items-center gap-2 transition-colors duration-200"
       >
+        <MdAddAlert />
         Report Incident
       </button>
     </form>
