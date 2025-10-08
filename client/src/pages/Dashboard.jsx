@@ -4,6 +4,7 @@ import IncidentCard from "../components/IncidentCard";
 import IncidentForm from "../components/IncidentForm";
 import IncidentMap from "../components/IncidentMap";
 import SummaryStats from "../components/SummaryStats";
+import AlertNotification from "../components/AlertNotification";  // NEW IMPORT
 import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 
@@ -35,7 +36,6 @@ export default function Dashboard() {
       const response = await updateIncidentStatus(incidentId, 'Resolved');
       console.log('Resolve response:', response.data);
       
-      // Update local state
       setIncidents(prev => 
         prev.map(incident => 
           incident._id === incidentId 
@@ -61,7 +61,6 @@ export default function Dashboard() {
       const response = await deleteIncident(incidentId);
       console.log('Delete response:', response.data);
       
-      // Remove from local state
       setIncidents(prev => prev.filter(incident => incident._id !== incidentId));
       alert('Incident deleted successfully!');
     } catch (error) {
@@ -74,7 +73,6 @@ export default function Dashboard() {
   useEffect(() => {
     fetchIncidents();
     
-    // Socket event listeners
     socket.on("newIncident", (incident) => {
       setIncidents((prev) => [incident, ...prev]);
     });
@@ -100,32 +98,33 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* EMERGENCY ALERTS - Shows on all pages */}
+      <AlertNotification />
+      
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white shadow">
         <h1 className="text-3xl font-bold text-blue-700">🚨 DisasterSync</h1>
         <div className="flex items-center gap-4">
-            {/* Admin Dashboard Link */}
-            {user?.role === 'admin' && (
-                <a
-                    href="/admin"
-                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded font-semibold transition-colors duration-200"
-                >
-                    🛡️ Admin Panel
-                </a>
-            )}
-            <div className="text-right">
-                <p className="text-gray-700 font-semibold">{user?.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role} User</p>
-            </div>
-            <button
-                onClick={logout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold transition-colors duration-200"
+          {user?.role === 'admin' && (
+            <a
+              href="/admin"
+              className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded font-semibold transition-colors duration-200"
             >
-                Logout
-                </button>
+              🛡️ Admin Panel
+            </a>
+          )}
+          <div className="text-right">
+            <p className="text-gray-700 font-semibold">{user?.name}</p>
+            <p className="text-xs text-gray-500 capitalize">{user?.role} User</p>
+          </div>
+          <button
+            onClick={logout}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold transition-colors duration-200"
+          >
+            Logout
+          </button>
         </div>
       </header>
-
 
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -139,16 +138,13 @@ export default function Dashboard() {
       )}
 
       <main className="max-w-6xl mx-auto p-4 sm:p-8">
-        {/* Summary Stats */}
         <SummaryStats incidents={incidents} />
 
-        {/* Interactive Map */}
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-800">📍 Incident Locations</h2>
           <IncidentMap incidents={incidents} />
         </div>
 
-        {/* Report Incident Button/Form */}
         <div className="mb-8">
           {!showForm ? (
             <div className="text-center">
@@ -178,7 +174,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Recent Incidents */}
         <div>
           <h2 className="text-2xl font-semibold mb-6 text-gray-800">📋 Recent Incidents</h2>
           {incidents.length === 0 ? (
