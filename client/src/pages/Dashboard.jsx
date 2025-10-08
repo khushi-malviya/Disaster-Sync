@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getIncidents } from '../services/api';
 import IncidentCard from '../components/IncidentCard';
 import IncidentForm from '../components/IncidentForm';
+import 'leaflet/dist/leaflet.css';
 
 export default function Dashboard() {
   const [incidents, setIncidents] = useState([]);
