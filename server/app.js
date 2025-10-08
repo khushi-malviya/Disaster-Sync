@@ -6,8 +6,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 app.use(express.json());
-const incidentRoutes = require('./routes/incidents');
-app.use('/api/incidents', incidentRoutes);
+
 
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -21,5 +20,7 @@ mongoose.connect(process.env.MONGO_URI, {
 app.get('/', (req, res) => {
   res.send('DisasterSync API is running!');
 });
+const incidentRoutes = require('./routes/incidents');
+app.use('/api/incidents', incidentRoutes);
 
 module.exports = app;
