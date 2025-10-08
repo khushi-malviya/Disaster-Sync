@@ -22,5 +22,10 @@ app.get('/', (req, res) => {
 });
 const incidentRoutes = require('./routes/incidents');
 app.use('/api/incidents', incidentRoutes);
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+const authMiddleware = require('./middleware/auth');
+app.use('api/incidents',authMiddleware(['admin', 'volunteer']));
+
 
 module.exports = app;
