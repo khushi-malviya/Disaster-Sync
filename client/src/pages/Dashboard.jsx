@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   return (
 
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-4 sm:p-8">
       <h2 className="text-2xl font-bold mb-4">DisasterSync Dashboard</h2>
       <IncidentForm onAdd={fetchIncidents} />
       {incidents.map((incident) => (
