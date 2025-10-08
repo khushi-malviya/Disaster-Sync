@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -16,16 +15,29 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('Connected to MongoDB Atlas'))
 .catch((err) => console.error('MongoDB connection error:', err));
 
-// Example route
-app.get('/', (req, res) => {
-  res.send('DisasterSync API is running!');
-});
-const incidentRoutes = require('./routes/incidents');
-app.use('/api/incidents', incidentRoutes);
+// Routes
 const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
-const authMiddleware = require('./middleware/auth');
-app.use('api/incidents',authMiddleware(['admin', 'volunteer']));
+const incidentRoutes = require('./routes/incidents');
+const userRoutes = require('./routes/users');
+const alertRoutes = require('./routes/alerts');
 
+app.use('/api/auth', authRoutes);
+app.use('/api/incidents', incidentRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/alerts', alertRoutes);
+
+// Health check route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'DisasterSync API is running!',
+    version: '1.0.0',
+    endpoints: [
+      '/api/auth',
+      '/api/incidents', 
+      '/api/users',
+      '/api/alerts'
+    ]
+  });
+});
 
 module.exports = app;

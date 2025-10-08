@@ -1,6 +1,63 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/incidents';
+const API_URL = 'http://localhost:5000/api';
 
-export const getIncidents = () => axios.get(API_URL);
-export const createIncident = (data) => axios.post(API_URL, data);
+// Set up axios interceptor to add auth token
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for better error handling
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    
+    // Handle unauthorized errors
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Auth APIs
+export const loginUser = (credentials) => 
+  axios.post(`${API_URL}/auth/login`, credentials);
+export const registerUser = (userData) => 
+  axios.post(`${API_URL}/auth/register`, userData);
+
+// Incident APIs
+export const getIncidents = () => axios.get(`${API_URL}/incidents`);
+export const createIncident = (data) => axios.post(`${API_URL}/incidents`, data);
+export const updateIncidentStatus = (id, status) => 
+  axios.patch(`${API_URL}/incidents/${id}/status`, { status });
+export const deleteIncident = (id) => 
+  axios.delete(`${API_URL}/incidents/${id}`);
+
+// User Management APIs (Admin only)
+export const getAllUsers = () => axios.get(`${API_URL}/users`);
+export const updateUserRole = (id, role) => 
+  axios.patch(`${API_URL}/users/${id}/role`, { role });
+export const deleteUser = (id) => 
+  axios.delete(`${API_URL}/users/${id}`);
+export const getUserProfile = () => 
+  axios.get(`${API_URL}/users/profile`);
+
+// Alert APIs (Admin only)
+export const broadcastAlert = (message, severity = 'high') => 
+  axios.post(`${API_URL}/alerts/broadcast`, { message, severity });
+export const getRecentAlerts = () => 
+  axios.get(`${API_URL}/alerts/recent`);

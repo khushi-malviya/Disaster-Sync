@@ -3,7 +3,9 @@ import React, { createContext, useState, useContext } from "react";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
   const [token, setToken] = useState(localStorage.getItem("token") || "");
 
   const login = (userData, jwt) => {

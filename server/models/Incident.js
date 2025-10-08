@@ -7,6 +7,7 @@ const IncidentSchema = new mongoose.Schema({
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: { type: [Number], required: true }, // [longitude, latitude]
   },
+  address: { type: String, default: '' },
   severity: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Low' },
   status: { type: String, enum: ['Reported', 'In Progress', 'Resolved'], default: 'Reported' },
   reportedAt: { type: Date, default: Date.now },
