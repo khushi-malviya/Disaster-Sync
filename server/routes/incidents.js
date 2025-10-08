@@ -28,6 +28,10 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
+
+  const newIncident = await incident.save();
+  io.emit('newIncident', newIncident); // Broadcast to all clients
+  res.status(201).json(newIncident);
 });
 
 module.exports = router;

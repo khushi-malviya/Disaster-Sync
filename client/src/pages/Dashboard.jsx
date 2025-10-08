@@ -3,6 +3,9 @@ import { getIncidents } from '../services/api';
 import IncidentCard from '../components/IncidentCard';
 import IncidentForm from '../components/IncidentForm';
 import 'leaflet/dist/leaflet.css';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 export default function Dashboard() {
   const [incidents, setIncidents] = useState([]);
@@ -14,6 +17,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchIncidents();
+    socket.on('newIncident', (incident) => {
+      setIncidents((prev) => [incident, ...prev]);
+    });
+    return () => socket.off('newIncident');
   }, []);
 
   return (
