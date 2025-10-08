@@ -4,6 +4,7 @@ import IncidentCard from '../components/IncidentCard';
 import IncidentForm from '../components/IncidentForm';
 import 'leaflet/dist/leaflet.css';
 import { io } from 'socket.io-client';
+import IncidentMap from '../components/IncidentMap';
 
 const socket = io('http://localhost:5000');
 
@@ -31,6 +32,8 @@ export default function Dashboard() {
       {incidents.map((incident) => (
         <IncidentCard key={incident._id} incident={incident} />
       ))}
+      <IncidentMap incidents={incidents} />
+
     </div>
   );
 }
