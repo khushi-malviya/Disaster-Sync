@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const VolunteerRequest = require('../models/VolunteerRequest');
 
 // Get all users (admin only)
 router.get('/', authMiddleware(['admin']), async (req, res) => {
@@ -76,6 +77,37 @@ router.get('/profile', authMiddleware(), async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+// POST: User submits request to become volunteer
+router.post('/request-volunteer', authMiddleware(), async (req, res) => {
+  try {
+    // Check if there's already a pending request
+    const exists = await VolunteerRequest.findOne({ userId: req.user.id, status: 'Pending' });
+    if (exists) return res.status(400).json({ message: "You have a pending request." });
+
+    await VolunteerRequest.create({ userId: req.user.id });
+    res.status(201).json({ message: "Request submitted." });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// GET: Admin fetches all pending requests
+router.get('/volunteer-requests', authMiddleware(['admin']), async (req, res) => {
+  const requests = await VolunteerRequest.find({ status: 'Pending' }).populate('userId', 'name email');
+  res.json(requests);
+});
+
+// PATCH: Admin approves/rejects
+router.patch('/volunteer-requests/:id', authMiddleware(['admin']), async (req, res) => {
+  const { status } = req.body;
+  const request = await VolunteerRequest.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate('userId');
+  if (status === 'Approved') {
+    // Promote user's role
+    await User.findByIdAndUpdate(request.userId._id, { role: 'volunteer' });
+  }
+  res.json(request);
 });
 
 module.exports = router;

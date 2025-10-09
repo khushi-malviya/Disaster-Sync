@@ -85,4 +85,17 @@ router.delete('/:id', authMiddleware(['admin']), async (req, res) => {
   }
 });
 
+router.get('/assigned', authMiddleware(['volunteer', 'admin']), async (req, res) => {
+  try {
+    // Example: assuming incidents have an assignedTo field with user id
+    const userId = req.user.id;
+    const assignedIncidents = await Incident.find({ assignedTo: userId }).sort({ reportedAt: -1 });
+    res.json(assignedIncidents);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
 module.exports = router;

@@ -8,9 +8,11 @@ const IncidentSchema = new mongoose.Schema({
     coordinates: { type: [Number], required: true }, // [longitude, latitude]
   },
   address: { type: String, default: '' },
+  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   severity: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Low' },
   status: { type: String, enum: ['Reported', 'In Progress', 'Resolved'], default: 'Reported' },
   reportedAt: { type: Date, default: Date.now },
+
 });
 
 IncidentSchema.index({ location: '2dsphere' });

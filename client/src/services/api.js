@@ -61,3 +61,8 @@ export const broadcastAlert = (message, severity = 'high') =>
   axios.post(`${API_URL}/alerts/broadcast`, { message, severity });
 export const getRecentAlerts = () => 
   axios.get(`${API_URL}/alerts/recent`);
+export const getAssignedIncidents = () => 
+    axios.get(`${API_URL}/incidents/assigned`);
+
+export const requestVolunteerRole = () =>
+  axios.post(`${API_URL}/users/request-volunteer`);
