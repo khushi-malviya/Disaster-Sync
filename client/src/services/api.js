@@ -66,3 +66,8 @@ export const getAssignedIncidents = () =>
 
 export const requestVolunteerRole = () =>
   axios.post(`${API_URL}/users/request-volunteer`);
+// Admin: Get/review/approve volunteer requests
+export const getPendingVolunteerRequests = () =>
+  axios.get(`${API_URL}/users/volunteer-requests`);
+export const updateVolunteerRequestStatus = (id, status) =>
+  axios.patch(`${API_URL}/users/volunteer-requests/${id}`, { status });
