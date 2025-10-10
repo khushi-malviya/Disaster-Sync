@@ -33,7 +33,7 @@ export default function Dashboard() {
               🛡️ Admin Panel
             </a>
           )}
-          {(user?.role === "volunteer" || user?.role === "admin") && (
+          {user?.role === "volunteer" && (
             <a
               href="/volunteer"
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-semibold transition-colors duration-200"

@@ -20,7 +20,11 @@ const authRoutes = require('./routes/auth');
 const incidentRoutes = require('./routes/incidents');
 const userRoutes = require('./routes/users');
 const alertRoutes = require('./routes/alerts');
+const inventoryRoutes = require('./routes/inventory');
+const inventoryRequestRoutes = require('./routes/inventoryRequests');
 
+app.use('/api/inventory-requests', inventoryRequestRoutes);
+app.use('/api/inventory', inventoryRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/incidents', incidentRoutes);
 app.use('/api/users', userRoutes);
@@ -35,7 +39,9 @@ app.get('/', (req, res) => {
       '/api/auth',
       '/api/incidents', 
       '/api/users',
-      '/api/alerts'
+      '/api/alerts',
+      '/api/inventory',
+      '/api/inventory-requests',
     ]
   });
 });

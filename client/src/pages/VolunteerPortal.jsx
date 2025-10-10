@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getIncidents, updateIncidentStatus, getAssignedIncidents } from '../services/api';
+import { getIncidents, updateIncidentStatus, getAssignedIncidents, requestIncidentAssignment, getInventoryItems, updateInventoryItem, createInventoryRequest, getVolunteerInventoryRequests  } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { MdAssignment, MdLocationOn, MdUpdate, MdChat, MdInventory, MdCheckCircle } from 'react-icons/md';
 import AlertNotification from '../components/AlertNotification';
@@ -11,10 +11,36 @@ export default function VolunteerPortal() {
   const [statusUpdate, setStatusUpdate] = useState({ incidentId: '', status: '', notes: '' });
   const [loading, setLoading] = useState(false);
   const { user, logout } = useAuth();
+  const [inventory, setInventory] = useState([]);
+  const [updatingId, setUpdatingId] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [newRequest, setNewRequest] = useState({ itemId: '', requestedQty: '' });
 
   useEffect(() => {
     fetchData();
   }, []);
+  useEffect(() => {
+    fetchInventory();
+    fetchRequests();
+  }, []);
+  
+  const fetchInventory = async () => {
+    try {
+      const res = await getInventoryItems();
+      setInventory(res.data);
+    } catch (error) {
+      alert('Failed to load inventory');
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+        const res = await getVolunteerInventoryRequests();
+        setRequests(res.data);
+    } catch {
+        alert('Failed to load your requests');
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -35,6 +61,45 @@ export default function VolunteerPortal() {
       } catch (err) {
         console.error('Fallback also failed:', err);
       }
+    }
+  };
+  
+  const handleInventoryChange = async (id, newQty) => {
+    if (isNaN(newQty) || newQty < 0) return; // validate
+    setUpdatingId(id);
+    try {
+      await updateInventoryItem(id, Number(newQty));
+      setInventory(prev => prev.map(item => item._id === id ? { ...item, quantity: Number(newQty) } : item));
+    } catch {
+      alert('Failed to update inventory');
+    }
+    setUpdatingId(null);
+  };
+
+  const handleRequestAssignment = async (incidentId) => {
+    setLoading(true);
+    try {
+      await requestIncidentAssignment(incidentId);
+      alert('Assignment request sent to admin!');
+    } catch (err) {
+      alert('Failed to send assignment request');
+    }
+    setLoading(false);
+  };
+
+  const handleSubmitRequest = async (e) => {
+    e.preventDefault();
+    if (!newRequest.itemId || !newRequest.requestedQty || newRequest.requestedQty <= 0) {
+        alert('Select item and enter requested quantity');
+        return;
+    }
+    try {
+        await createInventoryRequest(newRequest);
+        alert('Request submitted!');
+        setNewRequest({ itemId: '', requestedQty: '' });
+        fetchRequests();
+    } catch {
+        alert('Failed to submit request');
     }
   };
 
@@ -237,7 +302,7 @@ export default function VolunteerPortal() {
                         {incident.severity} Priority
                       </span>
                     </div>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-semibold">
+                    <button onClick={() => handleRequestAssignment(incident._id)} disabled={loading} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-semibold">
                       Request Assignment
                     </button>
                   </div>
@@ -316,25 +381,79 @@ export default function VolunteerPortal() {
                   </div>
                 </div>
               </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold mb-3">🛠️ Equipment Inventory</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between p-2 bg-gray-50 rounded">
-                    <span>First Aid Kits</span>
-                    <span className="text-green-600 font-bold">Available</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-gray-50 rounded">
-                    <span>Rescue Equipment</span>
-                    <span className="text-yellow-600 font-bold">Limited</span>
-                  </div>
-                  <div className="flex justify-between p-2 bg-gray-50 rounded">
-                    <span>Communication Devices</span>
-                    <span className="text-green-600 font-bold">Available</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </div>  
+              <section className="bg-white rounded-lg shadow p-6 mt-6">
+                <h2 className="text-2xl font-bold mb-4">🛠️ Equipment Inventory</h2>
+  
+                <table className="w-full text-sm mb-4">
+                   <thead>
+                     <tr>
+                        <th className="border p-2">Item</th>
+                        <th className="border p-2">Quantity</th>
+                        <th className="border p-2">Min Required</th>
+                        <th className="border p-2">Update Qty</th>
+                     </tr>
+                    </thead>
+                    <tbody>
+                        {inventory.map(item => (
+                          <tr key={item._id} className={item.quantity < item.minRequired ? 'bg-red-50' : ''}>
+                            <td className="border p-2">{item.name}</td>
+                            <td className="border p-2">{item.quantity}</td>
+                            <td className="border p-2">{item.minRequired}</td>
+                            <td className="border p-2">
+                              <input
+                                type="number"
+                                min="0"
+                                value={item.quantity}
+                                onChange={e => handleInventoryEdit(item._id, e.target.value)}
+                                className="w-20 border px-1 rounded"
+                               />
+                            </td>
+                           </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                <h3 className="font-semibold mb-2">Request Additional Equipment</h3>
+                <form onSubmit={handleSubmitRequest} className="flex space-x-4 items-center">
+                 <select
+                   className="border p-2 rounded"
+                   value={newRequest.itemId}
+                   onChange={e => setNewRequest({ ...newRequest, itemId: e.target.value })}
+                   required
+                 >
+                   <option value="">Select Equipment</option>
+                   {inventory.map(item => (
+                     <option key={item._id} value={item._id}>{item.name}</option>
+                   ))}
+                 </select>
+
+                 <input
+                  className="border p-2 rounded w-24"
+                  type="number"
+                  min="1"
+                  placeholder="Qty needed"
+                  value={newRequest.requestedQty}
+                  onChange={e => setNewRequest({ ...newRequest, requestedQty: e.target.value })}
+                  required
+                 />
+
+                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Submit Request</button>
+              </form>
+
+              <h3 className="font-semibold mt-6 mb-2">Your Equipment Requests</h3>
+              <ul className="list-disc pl-5 text-sm">
+                {requests.length === 0 ? <li>No requests made yet</li> :
+                  requests.map(r => (
+                    <li key={r._id}>
+                      <strong>{r.itemId.name}</strong> - Qty: {r.requestedQty} - <em>{r.status}</em>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+
+            
           </div>
         )}
       </div>

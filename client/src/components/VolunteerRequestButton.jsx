@@ -2,36 +2,35 @@ import React, { useState } from 'react';
 import { requestVolunteerRole } from '../services/api';
 
 export default function VolunteerRequestButton() {
-  const [requested, setRequested] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState({ requested: false, loading: false, error: null });
 
   const handleRequest = async () => {
-    setLoading(true);
+    setState(s => ({ ...s, loading: true, error: null }));
     try {
       await requestVolunteerRole();
-      alert('Volunteer role request submitted!');
-      setRequested(true);
+      setState({ requested: true, loading: false, error: null });
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to submit request');
+      setState({ ...state, loading: false, error: error.response?.data?.message || "Failed" });
     }
-    setLoading(false);
   };
 
-  if (requested) {
+  if (state.requested)
     return (
-      <p className="text-green-600 font-semibold">
-        Request submitted, awaiting approval.
-      </p>
+      <div className="text-green-600 font-semibold">
+        Request to become volunteer submitted, awaiting admin approval.
+      </div>
     );
-  }
 
   return (
-    <button
-      onClick={handleRequest}
-      disabled={loading}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-    >
-      {loading ? 'Submitting...' : 'Request Volunteer Role'}
-    </button>
+    <div>
+      <button
+        onClick={handleRequest}
+        disabled={state.loading}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+      >
+        {state.loading ? "Submitting..." : "Request Volunteer Role"}
+      </button>
+      {state.error && <div className="text-red-600 mt-2">{state.error}</div>}
+    </div>
   );
 }

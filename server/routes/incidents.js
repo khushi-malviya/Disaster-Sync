@@ -96,6 +96,46 @@ router.get('/assigned', authMiddleware(['volunteer', 'admin']), async (req, res)
   }
 });
 
+// Assign incident to a volunteer (admin only)
+router.patch('/:id/assign', authMiddleware(['admin']), async (req, res) => {
+  const { volunteerId } = req.body;
+  try {
+    if (!volunteerId) return res.status(400).json({ message: 'volunteerId required' });
+
+    const incident = await Incident.findByIdAndUpdate(
+      req.params.id,
+      { assignedTo: volunteerId, status: 'In Progress' }, // optionally update status
+      { new: true }
+    );
+    if (!incident) return res.status(404).json({ message: 'Incident not found' });
+
+    if (global.io) global.io.emit('incidentUpdated', incident);
+
+    res.json(incident);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
+router.post('/:id/request-assignment', authMiddleware(['volunteer']), async (req, res) => {
+  try {
+    const volunteerId = req.user.id;
+    const incidentId = req.params.id;
+
+    // Here you would store a request in DB, or notify admin; For demo:
+    // Emit event to admins or save to a collection for admin review
+
+    if (global.io) {
+      global.io.emit('assignmentRequest', { incidentId, volunteerId });
+    }
+
+    res.status(200).json({ message: 'Assignment request sent to admin' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 
 module.exports = router;

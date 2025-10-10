@@ -71,3 +71,25 @@ export const getPendingVolunteerRequests = () =>
   axios.get(`${API_URL}/users/volunteer-requests`);
 export const updateVolunteerRequestStatus = (id, status) =>
   axios.patch(`${API_URL}/users/volunteer-requests/${id}`, { status });
+export const assignIncidentToVolunteer = (incidentId, volunteerId) =>
+  axios.patch(`${API_URL}/incidents/${incidentId}/assign`, { volunteerId });
+//For volunteer portal
+export const requestIncidentAssignment = (incidentId) =>
+  axios.post(`${API_URL}/incidents/${incidentId}/request-assignment`);
+export const getInventoryItems = () =>
+  axios.get(`${API_URL}/inventory`);
+
+export const updateInventoryItem = (id, quantity) =>
+  axios.patch(`${API_URL}/inventory/${id}`, { quantity });
+
+export const createInventoryRequest = (data) =>
+  axios.post(`${API_URL}/inventory-requests`, data);
+
+export const getVolunteerInventoryRequests = () =>
+  axios.get(`${API_URL}/inventory-requests`);
+
+export const getAllInventoryRequests = () =>
+  axios.get(`${API_URL}/inventory-requests/all`);
+
+export const updateInventoryRequestStatus = (id, status) =>
+  axios.patch(`${API_URL}/inventory-requests/${id}`, { status });
