@@ -158,7 +158,7 @@ A comprehensive disaster management and relief coordination platform built with 
 
 **[Khushi Malviya]**
 - GitHub: [@khushi-malviya(https://github.com/khushi-malviya)
-- LinkedIn: [Your LinkedIn Profile](https://www.linkedin.com/in/khushi-malviya-72308a20b/)
+- LinkedIn: [My LinkedIn Profile](https://www.linkedin.com/in/khushi-malviya-72308a20b/)
 - Email: khushimalviya11054@gmail.com
 
 ---
